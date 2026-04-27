@@ -1,0 +1,87 @@
+# Decision Tree Regressor (DTR)
+from sklearn.model_selection import GridSearchCV
+from sklearn.tree import DecisionTreeRegressor
+
+# Define the parameter grid
+param_grid = {
+    'max_depth': [3, 5, 7, 10, 15, 20],
+    'min_samples_split': [2, 5, 10, 15],
+    'min_samples_leaf': [1, 2, 5, 10]
+}
+
+# Initialize the DecisionTreeRegressor
+regressor = DecisionTreeRegressor(random_state=0)
+
+# Initialize the Grid Search
+grid_search = GridSearchCV(estimator=regressor, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2, scoring='neg_mean_squared_error')
+
+# Fit the Grid Search to the data
+grid_search.fit(X_train, y_train)
+
+# Print the best parameters and the corresponding score
+print("Best Parameters:", grid_search.best_params_)
+print("Best MSE:", -grid_search.best_score_)
+
+
+# Gradient Boosting Regressor (GBR)
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import GradientBoostingRegressor
+
+# Define the parameter grid
+param_grid = {
+    'n_estimators': [ 200, 300, 500, 1000],
+    'max_depth': [3, 4, 5, 6],
+    'min_samples_split': [2, 5, 10, 15],
+    'min_samples_leaf': [1, 2, 5, 10],
+    'learning_rate': [0.01, 0.05, 0.1],
+    'subsample': [0.8, 0.9, 1.0],
+    'loss': ['squared_error', 'absolute_error', 'huber']
+}
+
+# Initialize the GradientBoostingRegressor
+regressor = GradientBoostingRegressor(random_state=0)
+
+# Initialize Grid Search
+grid_search = GridSearchCV(estimator=regressor, param_grid=param_grid, cv=5, n_jobs=-1, verbose=2, scoring='neg_mean_squared_error')
+
+# Fit the Grid Search to the data
+grid_search.fit(X_train, y_train)
+
+# Print the best parameters and the corresponding score
+print("Best Parameters:", grid_search.best_params_)
+print("Best MSE:", -grid_search.best_score_)
+
+
+
+# KNeighbors Regressor (KNR)
+from sklearn.model_selection import GridSearchCV, RepeatedKFold
+from sklearn.neighbors import KNeighborsRegressor
+
+# --- Expanded parameter grid (more robust) ---
+param_grid = {
+    'n_neighbors': [3, 5, 7, 9, 11, 15, 20],   # increased range
+    'weights': ['uniform', 'distance'],
+    'p': [1, 2]
+}
+
+# --- Better cross-validation ---
+cv = RepeatedKFold(n_splits=5, n_repeats=3, random_state=42)
+
+# --- Initialize model ---
+regressor = KNeighborsRegressor()
+
+# --- GridSearch ---
+grid_search = GridSearchCV(
+    estimator=regressor,
+    param_grid=param_grid,
+    cv=cv,
+    scoring='r2',          # maximize R²
+    n_jobs=-1              # use all cores (faster)
+)
+
+# --- Fit ---
+grid_search.fit(X_train_scaled, y_train)
+
+# --- Results ---
+print(f"Best parameters: {grid_search.best_params_}")
+print(f"Best CV R² score: {grid_search.best_score_:.3f}")
