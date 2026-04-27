@@ -1,0 +1,38 @@
+from sklearn.ensemble import IsolationForest
+from sklearn.svm import OneClassSVM
+from sklearn.neighbors import LocalOutlierFactor
+from sklearn.preprocessing import StandardScaler
+
+
+# Define input variables and target variable
+X = input varibales
+y = target varaible
+
+# Standardize the data
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Initialize the models
+iso_forest = IsolationForest(contamination=0.1, random_state=42)
+oc_svm = OneClassSVM(nu=0.1, gamma='auto')
+lof = LocalOutlierFactor(n_neighbors=20, contamination=0.1)
+
+# Fit the models and get predictions
+iso_forest.fit(X_scaled)
+oc_svm.fit(X_scaled)
+lof_predictions = lof.fit_predict(X_scaled)
+
+iso_forest_predictions = iso_forest.predict(X_scaled)
+oc_svm_predictions = oc_svm.predict(X_scaled)
+
+# Convert predictions to 0 (inlier) and 1 (outlier)
+iso_forest_predictions = np.where(iso_forest_predictions == 1, 0, 1)
+oc_svm_predictions = np.where(oc_svm_predictions == 1, 0, 1)
+lof_predictions = np.where(lof_predictions == 1, 0, 1)
+
+# Voting mechanism
+votes = iso_forest_predictions + oc_svm_predictions + lof_predictions
+outliers = np.where(votes > 1, 1, 0)
+
+# Find the inlier column to the dataframe
+inliers_df = df[df['outlier'] == 0]
