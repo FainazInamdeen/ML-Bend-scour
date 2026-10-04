@@ -1,4 +1,4 @@
-# ---Multiple Linear Regression (MLR) Model ---
+# ---Multiple Linear Regression (MLR) Model ----
 regressor1 = LinearRegression(fit_intercept=True, copy_X=True)
 
 # IMPORTANT: use SCALED data here
