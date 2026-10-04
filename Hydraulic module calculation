@@ -6,7 +6,7 @@ from shapely.geometry import Polygon, LineString
 
 #elevation data z as Y and station as X in excel sheet
 
-#First step: Manning coeffienct optimization
+## **First step: Manning coefficient optimization**
 
 # Function to process each Excel file
 def process_excel(file_path):
