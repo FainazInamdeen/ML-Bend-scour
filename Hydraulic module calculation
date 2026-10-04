@@ -1,1 +1,188 @@
+import os
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from shapely.geometry import Polygon, LineString
 
+#elevation data z as Y and station as X in excel sheet
+
+#First step: Manning coeffienct optimization
+
+# Function to process each Excel file
+def process_excel(file_path):
+    # Extracting file name without extension
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    # Read the Excel file
+    df = pd.read_excel(file_path)
+
+    # Extract X and Y columns
+    x = df['X'].values
+    y = df['Y'].values
+
+    # Plot the points and connect them
+    plt.plot(x, y, marker='o', label='Cross-Sectional Profile')
+    plt.title('Cross-Sectional Profile')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.grid(True)
+
+    # Create a polygon from the points
+    polygon = Polygon(np.column_stack((x, y)))
+
+    # Ask for the y value for the horizontal line
+    y_value = float(input(f"Enter the y value for the horizontal line in {file_name}: "))
+
+    # Draw a horizontal line at the specified y value
+    plt.axhline(y=y_value, color='r', linestyle='--', label=f'Horizontal Line at y={y_value}')
+
+    # Create a polygon for the enclosed area under the line
+    line_polygon = Polygon(np.column_stack((x, np.clip(y, None, y_value))))
+
+    # Calculate the area inside the polygon
+    A = line_polygon.area
+
+    print(f"Enclosed Area under y = {y_value} in {file_name} (A): {A}")
+
+    # Create points along the line for every 0.1 meters
+    interpolated_points = []
+    for i in range(len(x) - 1):
+        # Calculate the distance between consecutive points
+        distance = np.sqrt((x[i + 1] - x[i]) ** 2 + (y[i + 1] - y[i]) ** 2)
+        # Calculate the number of interpolated points needed
+        num_interpolated_points = int(distance / 0.01)
+        # Interpolate points along the line segment
+        x_interpolated = np.linspace(x[i], x[i + 1], num_interpolated_points + 1)
+        y_interpolated = np.linspace(y[i], y[i + 1], num_interpolated_points + 1)
+        # Append the interpolated points to the list
+        interpolated_points.extend(list(zip(x_interpolated, y_interpolated)))
+
+    # Convert the list of interpolated points to arrays
+    interpolated_points = np.array(interpolated_points)
+    x_interpolated = interpolated_points[:, 0]
+    y_interpolated = interpolated_points[:, 1]
+
+    # Filter points below the specified y value
+    x_below_y = x_interpolated[y_interpolated <= y_value]
+
+    # Calculate the length below the specified y value
+    P = LineString(zip(x_below_y, y_interpolated[y_interpolated <= y_value])).length
+
+    print(f"Total length below y = {y_value} in {file_name} (P): {P}")
+
+# Show the plot
+    plt.legend()
+    plt.show()
+
+    # Example variables for Manning's equation
+    Q = 573  # Manning's roughness coefficient
+    s = 0.000033  # Slope 
+
+    # Calculate hydraulic radius (R) using the formula R = A / P
+    if P != 0:
+        R = A / P
+    else:
+        R = 0  # Prevent division by zero
+
+    # Calculate flow (Q) using Manning's equation: Q = (1/n) * A * R^(2/3) * s^(0.5)
+    n = (1 / Q) * A * (R ** (2/3)) * (s ** 0.5)
+
+    print(f"Result of the n in {file_name}: {n}")
+
+# Process each Excel file
+file_names = ['xxx.xlsx']
+for file_name in file_names:
+    file_path = rf'/Users/xxx/{file_name}'
+    process_excel(file_path)
+
+#Second step: Calculate Bankfull flow (Q), Velocity (V), Area (A), Wetted perimeter (P)
+
+# Function to process each Excel file
+def process_excel(file_path):
+    # Extracting file name without extension
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    # Read the Excel file
+    df = pd.read_excel(file_path)
+
+    # Extract X and Y columns
+    x = df['X'].values
+    y = df['Y'].values
+
+    # Plot the points and connect them
+    plt.plot(x, y, marker='o', label='Cross-Sectional Profile')
+    plt.title('Cross-Sectional Profile')
+    plt.xlabel('X')
+    plt.ylabel('Y')
+    plt.grid(True)
+
+    # Create a polygon from the points
+    polygon = Polygon(np.column_stack((x, y)))
+
+    # Ask for the y value for the horizontal line
+    y_value = float(input(f"Enter the y value for the horizontal line in {file_name}: "))
+
+    # Draw a horizontal line at the specified y value
+    plt.axhline(y=y_value, color='r', linestyle='--', label=f'Horizontal Line at y={y_value}')
+
+    # Create a polygon for the enclosed area under the line
+    line_polygon = Polygon(np.column_stack((x, np.clip(y, None, y_value))))
+
+    # Calculate the area inside the polygon
+    A = line_polygon.area
+
+    print(f"Enclosed Area under y = {y_value} in {file_name} (A): {A}")
+
+    # Create points along the line for every 0.1 meters
+    interpolated_points = []
+    for i in range(len(x) - 1):
+        # Calculate the distance between consecutive points
+        distance = np.sqrt((x[i + 1] - x[i]) ** 2 + (y[i + 1] - y[i]) ** 2)
+        # Calculate the number of interpolated points needed
+        num_interpolated_points = int(distance / 0.01)
+        # Interpolate points along the line segment
+        x_interpolated = np.linspace(x[i], x[i + 1], num_interpolated_points + 1)
+        y_interpolated = np.linspace(y[i], y[i + 1], num_interpolated_points + 1)
+        # Append the interpolated points to the list
+        interpolated_points.extend(list(zip(x_interpolated, y_interpolated)))
+
+    # Convert the list of interpolated points to arrays
+    interpolated_points = np.array(interpolated_points)
+    x_interpolated = interpolated_points[:, 0]
+    y_interpolated = interpolated_points[:, 1]
+
+    # Filter points below the specified y value
+    x_below_y = x_interpolated[y_interpolated <= y_value]
+
+    # Calculate the length below the specified y value
+    P = LineString(zip(x_below_y, y_interpolated[y_interpolated <= y_value])).length
+
+    print(f"Total length below y = {y_value} in {file_name} (P): {P}")
+
+# Show the plot
+    plt.legend()
+    plt.show()
+
+    # Example variables for Manning's equation
+    n = 0.034  # Manning's roughness coefficient
+    s = 0.000033  # Slope (calibrate if possible with LiDar points and survey date)
+
+    # Calculate hydraulic radius (R) using the formula R = A / P
+    if P != 0:
+        R = A / P
+    else:
+        R = 0  # Prevent division by zero
+
+    # Calculate flow (Q) using Manning's equation: Q = (1/n) * A * R^(2/3) * s^(0.5)
+    Q = (1 / n) * A * (R ** (2/3)) * (s ** 0.5)
+
+    # Calculate Velocity (V): 
+    V = Q / A 
+
+    print(f"Result of the Q in {file_name}: {Q}")
+
+# Process each Excel file
+file_names = ['xxx.xlsx']
+for file_name in file_names:
+    file_path = rf'/Users/xxx/{file_name}'
+    process_excel(file_path)
