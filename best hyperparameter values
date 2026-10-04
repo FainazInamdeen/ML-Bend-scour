@@ -1,4 +1,4 @@
-# Decision Tree Regressor (DTR)
+# Decision Tree Regressor  (DTR)
 from sklearn.model_selection import GridSearchCV
 from sklearn.tree import DecisionTreeRegressor
 
